@@ -1,0 +1,12 @@
+# Dépendances Python pour le script de numérotation PDF
+# Auteur: Baptiste LECHAT
+# Version: 1.0
+
+# Librairie pour la manipulation de fichiers PDF
+pypdf==5.9.0
+
+# Librairie pour la génération de contenu PDF (numérotation)
+reportlab==4.2.5
+
+# Librairie pour la compilation en exécutable (optionnel, pour le développement)
+pyinstaller==6.11.1

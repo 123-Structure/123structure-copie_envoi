@@ -4,8 +4,11 @@
 
 Ce projet permet d'ajouter une option **"PRET POUR L'ENVOI"** dans le menu contextuel (clic droit) de Windows pour copier rapidement n'importe quel fichier vers le dossier central d'envoi de l'entreprise.
 
+**🆕 Nouvelle fonctionnalité** : Numérotation automatique des pages PDF avec l'option **"NUMEROTER PDF"**.
+
 ## 🎯 Fonctionnalités
 
+### 📤 Copie Envoi
 - ✅ **Menu contextuel personnalisé** : Option "PRET POUR L'ENVOI" avec icône moderne
 - ✅ **Copie automatique** vers `Y:\#Envoie` ou `Z:\#Envoie` (selon disponibilité)
 - ✅ **Extraction intelligente du nom de projet** : Remonte jusqu'à 4 niveaux dans l'arborescence
@@ -16,16 +19,29 @@ Ce projet permet d'ajouter une option **"PRET POUR L'ENVOI"** dans le menu conte
 - ✅ **Position prioritaire** : Affiché en haut du menu contextuel Windows 11
 - ✅ **Installation/Désinstallation** : Scripts automatisés pour le déploiement
 
+### 🔢 Numérotation PDF
+- ✅ **Menu contextuel PDF** : Option "NUMEROTER PDF" pour les fichiers PDF
+- ✅ **Numérotation automatique** : Ajoute "page/total" en bas à droite de chaque page
+- ✅ **Détection intelligente** : Traite uniquement les fichiers contenant "_original" ou "ORIGINAL_"
+- ✅ **Génération propre** : Crée un nouveau fichier sans le suffixe "_original"
+- ✅ **Police standard** : Utilise Helvetica pour une compatibilité maximale
+- ✅ **Feedback détaillé** : Affiche le nombre de pages traitées et la taille du fichier
+
 ## 📁 Structure du projet
 
 ```
-copie_envoi/
-├── copie_envoi.ps1           # Script PowerShell principal
-├── generate_install.ps1      # 🆕 Générateur automatique des fichiers .reg
-├── install.reg               # Fichier d'installation (généré automatiquement)
-├── uninstall.reg             # Fichier de désinstallation (généré automatiquement)
-├── icon_envoi.ico            # Icône personnalisée SVG
-└── README.md                 # Ce guide complet
+123structure-copie_envoi/
+├── copie_envoi/
+│   └── copie_envoi.ps1           # Script PowerShell principal
+├── numerotation_pdf/
+│   ├── main.py                   # Script Python de numérotation
+│   ├── requirements.txt          # Dépendances Python
+│   ├── build.bat                 # Script de compilation
+│   └── pdf_numerotation.exe      # Exécutable compilé
+├── generate_install.ps1          # 🆕 Générateur automatique des fichiers .reg
+├── install.reg                   # Fichier d'installation (généré automatiquement)
+├── uninstall.reg                 # Fichier de désinstallation (généré automatiquement)
+└── README.md                     # Ce guide complet
 ```
 
 ## 🚀 Installation
@@ -35,6 +51,7 @@ copie_envoi/
 - Windows 10/11
 - Droits administrateur pour modifier le registre
 - PowerShell activé (par défaut sur Windows)
+- Python 3.x (pour la compilation du module PDF, optionnel si vous utilisez l'exécutable fourni)
 
 ### 🎯 Méthode Recommandée (Automatique)
 
@@ -42,25 +59,27 @@ copie_envoi/
 
 2. **Générer les fichiers .reg automatiquement** :
    - Clic droit sur `generate_install.ps1` → **"Exécuter avec PowerShell"**
-   - Le script génère automatiquement `install.reg` et `uninstall.reg` avec le bon chemin
+   - Le script génère automatiquement `install.reg` et `uninstall.reg` avec les bons chemins
    - ✅ **Avantage** : Fonctionne peu importe où vous placez le projet
 
-3. **Installer le menu contextuel** :
+3. **Installer les menus contextuels** :
    - Clic droit sur le `install.reg` généré → **"Fusionner"**
    - Confirmer l'ajout au registre Windows
 
 4. **Vérifier l'installation** :
-   - Clic droit sur n'importe quel fichier
-   - L'option **"📤 PRET POUR L'ENVOI"** doit apparaître en haut du menu
+   - Clic droit sur n'importe quel fichier → L'option **"📤 PRET POUR L'ENVOI"** doit apparaître
+   - Clic droit sur un fichier PDF → L'option **"🔢 NUMEROTER PDF"** doit apparaître
 
 ### 📝 Méthode Manuelle (Alternative)
 
 1. **Télécharger les fichiers** dans un dossier accessible
-2. **Modifier manuellement `install.reg`** pour corriger le chemin vers `copie_envoi.ps1`
+2. **Modifier manuellement `install.reg`** pour corriger les chemins vers `copie_envoi.ps1` et `pdf_numerotation.exe`
 3. **Exécuter l'installation** comme ci-dessus
 4. ⚠️ **Inconvénient** : À refaire si vous déplacez le dossier
 
 ## 📖 Utilisation
+
+### 📤 Copie Envoi
 
 1. **Clic droit** sur le fichier à envoyer
 2. **Sélectionner** "PRET POUR L'ENVOI"
@@ -69,7 +88,7 @@ copie_envoi/
    - `Y:\#Envoie\[NomDuProjet]\` (priorité 1)
    - `Z:\#Envoie\[NomDuProjet]\` (si Y: non disponible)
 
-### Extraction du nom de projet
+#### Extraction du nom de projet
 
 Le script extrait automatiquement le nom du projet en remontant l'arborescence :
 
@@ -77,10 +96,20 @@ Le script extrait automatiquement le nom du projet en remontant l'arborescence :
 - **Résultat** : Copie vers `Y:\#Envoie\MonProjet\fichier.txt`
 - **Fallback** : Si aucun projet détecté → `Fichier_AAAAMMJJ_HHMMSS`
 
-### Messages de retour
+### 🔢 Numérotation PDF
 
-- ✅ **Succès** : Affiche le chemin source, destination et taille du fichier
-- ❌ **Erreur** : Détaille le problème rencontré (fichier inexistant, dossier inaccessible, etc.)
+1. **Renommer votre PDF** pour inclure "_original" ou "ORIGINAL_" dans le nom
+   - Exemple : `mon_document_original.pdf` ou `ORIGINAL_rapport.pdf`
+2. **Clic droit** sur le fichier PDF
+3. **Sélectionner** "NUMEROTER PDF"
+4. **Attendre** le traitement (fenêtre de confirmation automatique)
+5. Un nouveau fichier est créé sans le suffixe "_original"
+   - Exemple : `mon_document_original.pdf` → `mon_document.pdf`
+
+#### Messages de retour
+
+- ✅ **Succès** : Affiche le chemin source, destination, nombre de pages et taille du fichier
+- ❌ **Erreur** : Détaille le problème rencontré (fichier inexistant, nom incorrect, etc.)
 
 ## 🎨 Personnalisation
 
@@ -166,104 +195,58 @@ Pour restreindre l'option aux fichiers PDF :
 
 Pour changer les dossiers cibles :
 
-1. Ouvrir `copie_envoi.ps1` dans un éditeur
+1. Ouvrir `copie_envoi/copie_envoi.ps1` dans un éditeur
 2. Modifier la variable `$DestinationFolders` (lignes 10-13)
 3. Sauvegarder le fichier
+
+### Recompiler le module PDF
+
+Si vous modifiez le script Python :
+
+1. **Installer les dépendances** :
+   ```cmd
+   cd numerotation_pdf
+   pip install -r requirements.txt
+   ```
+
+2. **Recompiler l'exécutable** :
+   ```cmd
+   .\build.bat
+   ```
+
+3. **Régénérer les fichiers .reg** :
+   ```cmd
+   cd ..
+   .\generate_install.ps1
+   ```
 
 ## 🗑️ Désinstallation
 
 1. **Clic droit** sur `uninstall.reg` → **"Fusionner"**
-2. **Confirmer** la suppression du registre
-3. **Supprimer** le dossier contenant les fichiers du projet
+2. **Confirmer** la suppression des entrées du registre
+3. **Supprimer** le dossier du projet si souhaité
 
-## 🔧 Dépannage
+## 🐛 Dépannage
 
-### L'option n'apparaît pas dans le menu contextuel
+### Le menu contextuel n'apparaît pas
 
-- Vérifier que `install.reg` a été exécuté avec les droits administrateur
-- Redémarrer l'explorateur Windows (`Ctrl+Shift+Échap` → Redémarrer "Explorateur Windows")
-- Vérifier que le chemin du script est correct dans le registre
+1. Vérifier que `install.reg` a été exécuté avec les droits administrateur
+2. Redémarrer l'Explorateur Windows
+3. Vérifier les chemins dans le registre avec `regedit`
 
-### La fenêtre se ferme immédiatement sans afficher de message
+### Erreur "Fichier non trouvé" pour la numérotation PDF
 
-- Le script utilise maintenant `-WindowStyle Normal` pour rester visible
-- Une pause "Appuyez sur une touche" permet de lire les messages
+1. Vérifier que le nom du fichier contient "_original" ou "ORIGINAL_"
+2. S'assurer que `pdf_numerotation.exe` existe dans le dossier `numerotation_pdf/`
+3. Recompiler l'exécutable si nécessaire avec `build.bat`
 
-### Erreur "Fichier de script introuvable"
-- **Solution rapide** : Exécuter `generate_install.ps1` puis réinstaller avec le nouveau `install.reg`
-- Vérifier que `copie_envoi.ps1` est dans le même dossier que lors de l'installation
-- Le chemin dans le registre doit correspondre à l'emplacement réel du script
+### Erreur de police dans la numérotation
 
-### Projet déplacé vers un autre dossier
-- **Solution automatique** : Exécuter `generate_install.ps1` dans le nouveau dossier
-- Désinstaller l'ancienne version avec `uninstall.reg`
-- Installer la nouvelle version avec le `install.reg` fraîchement généré
+Le script utilise maintenant la police Helvetica (standard). Si vous rencontrez des erreurs :
 
-### Erreur "Dossier de destination inaccessible"
-
-- Vérifier la connectivité réseau
-- Contrôler les droits d'accès aux dossiers `Y:\#Envoie` et `Z:\#Envoie`
-- Vérifier que les lecteurs réseau sont montés
-
-### L'icône ne s'affiche pas
-
-- Vérifiez le chemin de l'icône dans `install.reg`
-- Utilisez des barres obliques inversées doubles `\\`
-- Testez avec une icône système d'abord
-
-### Menu toujours dans "Afficher d'autres options" (Windows 11)
-
-- La configuration actuelle avec `"Position"="Top"` devrait résoudre le problème
-- Redémarrez complètement Windows si nécessaire
-- Vérifiez les permissions du registre
-
-### Politique d'exécution PowerShell
-
-Si PowerShell refuse d'exécuter le script :
-
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
-## 🌐 Ressources pour les Icônes Windows
-
-Pour explorer toutes les icônes Windows disponibles :
-
-**🔗 Site recommandé** : [Windows Icons Gallery](https://www.nirsoft.net/utils/iconsext.html)
-
-- Outil gratuit NirSoft IconsExtract
-- Permet d'extraire et visualiser toutes les icônes des DLL Windows
-- Support de `shell32.dll`, `imageres.dll`, `wmploc.dll`, etc.
-
-**Alternative en ligne** : [Icon Archive - Windows Icons](https://www.iconarchive.com/show/windows-8-icons-by-icons8.html)
-
-## 📝 Notes techniques
-
-- **Sécurité** : Le script utilise `-ExecutionPolicy Bypass` pour éviter les restrictions
-- **Performance** : Copie directe sans compression pour préserver la vitesse
-- **Compatibilité** : Testé sur Windows 10 et Windows 11
-- **Encodage** : Support UTF-8 pour les caractères spéciaux
-- **Architecture** : Extraction intelligente du nom de projet sur 4 niveaux
-- **Interface** : Icône moderne et position prioritaire dans le menu contextuel
-
-## 🎯 Résultat Final
-
-✅ **Menu principal** : "📤 PRET POUR L'ENVOI" avec icône moderne  
-✅ **Position** : En haut du menu contextuel Windows 11  
-✅ **Fonctionnement** : Clic direct sans "Afficher d'autres options"  
-✅ **Organisation** : Création automatique de dossiers par projet  
-✅ **Feedback** : Messages clairs de succès ou d'erreur
-
-## 🤝 Support
-
-Pour toute question ou problème :
-
-1. Vérifier la section **Dépannage** ci-dessus
-2. Consulter les logs PowerShell en cas d'erreur
-3. Contacter l'administrateur système si nécessaire
+1. Vérifier que les dépendances Python sont installées : `pip install -r requirements.txt`
+2. Recompiler l'exécutable : `.\build.bat`
 
 ---
 
-**Auteur** : Baptiste LECHAT  
-**Version** : 2.0  
-**Dernière mise à jour** : 09/01/2025
+**Développé par [Baptiste LECHAT](https://github.com/baptistelechat)** 👨‍💻 
